@@ -1,0 +1,39 @@
+#!/bin/bash
+echo "Provisioning box"
+
+echo "Installing DB2"
+tar xvf /vagrant/v10.5_linuxx64_expc.tar.gz
+yum -y install libaio
+yum -y install pam.i686
+yum upgrade libstdc++
+yum -y install libstdc++.i686
+yum upgrade zlib
+yum -y install zlib.i686
+./expc/db2setup -r /vagrant/db2expc.rsp
+
+echo "Creating the DB2 sample DB"
+su - db2inst1 -c "db2sampl"
+
+echo "Installing UnZip"
+yum -y install unzip
+
+echo "Installing Java Open JDK 1.8"
+yum -y install java-1.8.0-openjdk
+yum -y install java-1.8.0-openjdk-devel
+
+echo "Installing Git"
+yum -y install git
+
+echo "Installing Gradle 2.8"
+mkdir /opt/gradle
+curl -o /tmp/gradle-2.8-bin.zip http://downloads.gradle.org/distributions/gradle-2.8-bin.zip
+unzip -oq /tmp/gradle-2.8-bin.zip -d /opt/gradle
+ln -sfnv gradle-2.8 /opt/gradle/latest
+
+echo "Updating bash_profile with Gradle"
+printf "\n## GRADLE 2.8 ##\nexport GRADLE_HOME=/opt/gradle/latest\nexport PATH=\$PATH:\$GRADLE_HOME/bin \n## GRADLE 2.8 ##" >> /home/vagrant/.bash_profile
+
+source ~/.bash_profile
+
+echo "Copying motd"
+cp /vagrant/config/motd /etc/motd
